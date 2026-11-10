@@ -1,7 +1,10 @@
 # Telco customer churn coursework
 
-CM2604 Coursework Part 1. The work currently covers dataset inspection and
-preparation. Models and model scores have not been produced.
+CM2604 Coursework Part 1. The work currently covers dataset inspection,
+preparation and training-only EDA. Models and model scores have not been produced.
+
+Read [the findings and plots](results/eda/EDA.md), then open
+01_data_and_eda.ipynb for a short walkthrough of the executed workflow.
 
 ## Run the dataset audit
 
@@ -13,7 +16,9 @@ python -m venv .venv
 .\.venv\Scripts\python.exe download_data.py
 .\.venv\Scripts\python.exe audit_data.py
 .\.venv\Scripts\python.exe prepare_data.py
+.\.venv\Scripts\python.exe explore_data.py
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe run_notebook.py
 ~~~
 
 The downloader verifies the original CSV against a recorded SHA-256. It stops if
@@ -41,6 +46,32 @@ remain local.
 
 Different customer IDs with the same predictor values are retained as distinct
 records. Matching profiles alone do not establish duplicate customers.
+
+## Outputs and explanation
+
+The EDA uses 5,634 training records. It saves six aggregate CSV tables and four
+PNG figures covering churn balance, numeric distributions, category churn
+rates with group sizes, and correlations. The findings explain the observed
+associations and the reasons for the preparation choices. There are no test
+feature summaries or model performance claims.
+
+The notebook calls the same small Python files used by the command-line
+workflow and displays their aggregate outputs. Keep these files together.
+run_notebook.py selects the current Python interpreter explicitly and executes
+the notebook with a fresh kernel. In an editor, choose the environment where
+the requirements were installed.
+
+The checked local environment is recorded in results/environment.json. On the
+author's Windows computer, the bundled Python 3.12 runtime and a local
+.venv312 environment were used after application control rejected a newly
+installed Python 3.14 pandas build. Security settings were not changed.
+
+## Next milestone
+
+Build preprocessing pipelines and the three required baseline classifiers.
+Imputation, encoding and scaling must be fitted within training folds.
+Clarify the brief's phrase "both model experimental settings" before finalizing
+the experiment comparison. Keep the final test reserved until selection is fixed.
 
 ## Dataset and publication
 
