@@ -4,6 +4,7 @@ import unittest
 
 from audit_data import audit, read_original, validate_schema
 from download_data import verify_bytes
+from prepare_data import FEATURES, clean_data, make_split
 
 
 class DataChecks(unittest.TestCase):
@@ -38,6 +39,34 @@ class DataChecks(unittest.TestCase):
         frame.loc[0, "TotalCharges"] = "not known"
         with self.assertRaisesRegex(ValueError, "Unexpected non-numeric"):
             validate_schema(frame)
+
+    def test_cleaning_preserves_missing_totals_and_rows(self):
+        cleaned = clean_data(self.original)
+        self.assertEqual(len(cleaned), len(self.original))
+        self.assertEqual(int(cleaned["TotalCharges"].isna().sum()), 11)
+        self.assertEqual(set(cleaned["Churn"]), {0, 1})
+        self.assertNotIn("customerID", FEATURES)
+        self.assertNotIn("Churn", FEATURES)
+        self.assertEqual(len(FEATURES), 19)
+        self.assertEqual(int(self.original["TotalCharges"].eq(" ").sum()), 11)
+
+    def test_split_is_disjoint_complete_and_repeatable(self):
+        cleaned = clean_data(self.original)
+        train, test = make_split(cleaned)
+        train_again, test_again = make_split(cleaned)
+        self.assertEqual((len(train), len(test)), (5634, 1409))
+        self.assertFalse(set(train["customerID"]) & set(test["customerID"]))
+        self.assertEqual(set(train.index) | set(test.index), set(cleaned.index))
+        self.assertEqual(train.index.tolist(), train_again.index.tolist())
+        self.assertEqual(test.index.tolist(), test_again.index.tolist())
+        for partition in [train, test]:
+            self.assertLess(abs(partition["Churn"].mean() - cleaned["Churn"].mean()), 0.001)
+
+    def test_missing_monthly_charge_is_rejected(self):
+        frame = self.original.copy()
+        frame.loc[0, "MonthlyCharges"] = ""
+        with self.assertRaisesRegex(ValueError, "Unexpected non-numeric"):
+            clean_data(frame)
 
 
 if __name__ == "__main__":

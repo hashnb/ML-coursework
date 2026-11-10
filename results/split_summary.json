@@ -1,0 +1,58 @@
+{
+  "source_sha256": "88be4b93fbe0cc83421af1c503794c97c342eca914c1576db7c276e61d61358a",
+  "test_size": 0.2,
+  "random_state": 42,
+  "method": "stratified random holdout by Churn",
+  "target_encoding": {
+    "No": 0,
+    "Yes": 1
+  },
+  "numeric_features": [
+    "tenure",
+    "MonthlyCharges",
+    "TotalCharges"
+  ],
+  "categorical_features": [
+    "gender",
+    "SeniorCitizen",
+    "Partner",
+    "Dependents",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod"
+  ],
+  "excluded_predictors": [
+    "customerID",
+    "Churn"
+  ],
+  "imputation_scaling_encoding_fitted": false,
+  "partitions": {
+    "train": {
+      "rows": 5634,
+      "class_counts": {
+        "0": 4139,
+        "1": 1495
+      },
+      "data_sha256": "f24d70f323d716807fb79e0b22b55f61a43d65fc9d7ad34ac239715d6024d6cf",
+      "manifest_sha256": "b40bab5915da4f073e517c1552b56a724076ba055b4c01c466ef3bd74d576629"
+    },
+    "test": {
+      "rows": 1409,
+      "class_counts": {
+        "0": 1035,
+        "1": 374
+      },
+      "data_sha256": "13532d147654a530a37ea6bc8bdfa89da46b85755015161b2769c867b1c5993e",
+      "manifest_sha256": "1778b191a462b1df1b25710b8410b7baec8fc8de1fd9814bd7d39c55eca69dd0"
+    }
+  }
+}

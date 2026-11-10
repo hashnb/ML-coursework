@@ -1,7 +1,7 @@
 # Telco customer churn coursework
 
-CM2604 Coursework Part 1. This first increment downloads and audits the specified
-Telco Customer Churn CSV. Models and model scores have not been produced.
+CM2604 Coursework Part 1. The work currently covers dataset inspection and
+preparation. Models and model scores have not been produced.
 
 ## Run the dataset audit
 
@@ -12,11 +12,35 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe download_data.py
 .\.venv\Scripts\python.exe audit_data.py
+.\.venv\Scripts\python.exe prepare_data.py
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ~~~
 
 The downloader verifies the original CSV against a recorded SHA-256. It stops if
 the dataset has changed. The audit reports schema, blank values, duplicates and
 target counts in results/data_audit.json.
+
+## Preparation decisions
+
+The split reserves 20% for the final test and uses 80% for development. A fixed
+seed of 42 makes it repeatable; stratification keeps the churn proportions close
+in both partitions. These are implementation choices, not prescribed coursework
+settings. Training data will supply the EDA and later cross-validation.
+
+Cleaning trims surrounding spaces, converts tenure and charge fields to numbers,
+and maps Churn from No/Yes to 0/1. The 11 blank total-charge values remain missing.
+Customer IDs stay in local split manifests and are excluded from predictors.
+SeniorCitizen stays categorical despite its numeric-looking values. Structural
+labels such as "No internet service" remain valid categories.
+
+No imputer, scaler or encoder has been fitted. Later model pipelines must fit
+learned transformations inside training folds. The reserved test must not guide
+feature selection, hyperparameters or thresholds. The split summary records the
+seed, feature groups, counts and checksums. Prepared rows and split manifests
+remain local.
+
+Different customer IDs with the same predictor values are retained as distinct
+records. Matching profiles alone do not establish duplicate customers.
 
 ## Dataset and publication
 
