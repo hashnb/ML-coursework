@@ -1,4 +1,4 @@
-"""Execute the saved notebook with this Python environment and a fresh kernel."""
+"""Run the exploration notebook from a fresh kernel using this interpreter."""
 
 import sys
 from pathlib import Path
@@ -6,11 +6,12 @@ from pathlib import Path
 import nbformat
 from nbclient import NotebookClient
 from jupyter_client import KernelManager
-from download_data import ROOT
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    path = ROOT / "01_data_and_eda.ipynb"
+    path = ROOT / "notebooks/01_data_exploration.ipynb"
     notebook = nbformat.read(path, as_version=4)
     nbformat.validate(notebook)
     manager = KernelManager(kernel_name="python3")
@@ -21,9 +22,14 @@ def main():
         notebook, km=manager, timeout=180,
         resources={"metadata": {"path": str(ROOT)}},
     )
-    client.execute()
-    nbformat.write(notebook, path)
-    print("Notebook executed successfully from a fresh kernel.")
+    try:
+        client.execute()
+        nbformat.write(notebook, path)
+    finally:
+        if manager.has_kernel:
+            manager.shutdown_kernel(now=True)
+        manager.cleanup_resources()
+    print("Exploration finished. Notebook, figures and tables saved.")
 
 
 if __name__ == "__main__":

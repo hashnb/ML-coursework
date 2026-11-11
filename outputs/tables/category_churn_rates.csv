@@ -1,0 +1,14 @@
+feature,category,customers,churned,churn_percent
+Contract,Month-to-month,3102,1326,42.74661508704062
+Contract,One year,1173,130,11.082693947144074
+Contract,Two year,1359,39,2.869757174392936
+InternetService,DSL,1937,362,18.68869385647909
+InternetService,Fiber optic,2483,1045,42.08618606524366
+InternetService,No,1214,88,7.248764415156507
+PaymentMethod,Bank transfer (automatic),1244,201,16.157556270096464
+PaymentMethod,Credit card (automatic),1213,181,14.921681780708987
+PaymentMethod,Electronic check,1891,865,45.742993125330514
+PaymentMethod,Mailed check,1286,248,19.284603421461895
+TechSupport,No,2771,1157,41.75387946589679
+TechSupport,No internet service,1214,88,7.248764415156507
+TechSupport,Yes,1649,250,15.160703456640388

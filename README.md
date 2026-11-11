@@ -1,88 +1,64 @@
-# Telco customer churn coursework
+# Telco customer churn
 
-CM2604 Coursework Part 1. The work currently covers dataset inspection,
-preparation and training-only EDA. Models and model scores have not been produced.
+CM2604 Coursework Part 1. This first phase loads and cleans the Telco data,
+reserves a test set, and explores the training data. Models and the report
+will be added in later phases.
 
-Read [the findings and plots](results/eda/EDA.md), then open
-01_data_and_eda.ipynb for a short walkthrough of the executed workflow.
+## Run
 
-## Run the dataset audit
-
-Use Python 3.12. From this folder:
+On the existing development machine, run these commands from the project folder:
 
 ~~~powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe download_data.py
-.\.venv\Scripts\python.exe audit_data.py
-.\.venv\Scripts\python.exe prepare_data.py
-.\.venv\Scripts\python.exe explore_data.py
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe run_notebook.py
+.\.venv312\Scripts\python.exe scripts/run_exploration.py
+.\.venv312\Scripts\python.exe -m unittest discover -s tests -v
 ~~~
 
-The downloader verifies the original CSV against a recorded SHA-256. It stops if
-the dataset has changed. The audit reports schema, blank values, duplicates and
-target counts in results/data_audit.json.
+The runner executes [the notebook](notebooks/01_data_exploration.ipynb) in a
+fresh kernel and saves its outputs, figures and CSV tables. The notebook also
+opens in a Python notebook editor using the same environment.
 
-## Preparation decisions
+For a fresh clone, use Python 3.12 to create an environment with
+python -m venv .venv312, then install dependencies with
+.\.venv312\Scripts\python.exe -m pip install -r requirements.txt
+before running the commands above. These setup commands assume python points
+to Python 3.12.
 
-The split reserves 20% for the final test and uses 80% for development. A fixed
-seed of 42 makes it repeatable; stratification keeps the churn proportions close
-in both partitions. These are implementation choices, not prescribed coursework
-settings. Training data will supply the EDA and later cross-validation.
+## Data
 
-Cleaning trims surrounding spaces, converts tenure and charge fields to numbers,
-and maps Churn from No/Yes to 0/1. The 11 blank total-charge values remain missing.
-Customer IDs stay in local split manifests and are excluded from predictors.
-SeniorCitizen stays categorical despite its numeric-looking values. Structural
-labels such as "No internet service" remain valid categories.
+The [Kaggle Telco Customer Churn dataset](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
+credits IBM sample data. The loader downloads the CSV on its first run and
+checks its SHA-256 against version 1:
 
-No imputer, scaler or encoder has been fitted. Later model pipelines must fit
-learned transformations inside training folds. The reserved test must not guide
-feature selection, hyperparameters or thresholds. The split summary records the
-seed, feature groups, counts and checksums. Prepared rows and split manifests
-remain local.
+~~~text
+88be4b93fbe0cc83421af1c503794c97c342eca914c1576db7c276e61d61358a
+~~~
 
-Different customer IDs with the same predictor values are retained as distinct
-records. Matching profiles alone do not establish duplicate customers.
+If the automatic download fails, download and extract the dataset from Kaggle
+and put WA_Fn-UseC_-Telco-Customer-Churn.csv in data/raw/, then rerun. Customer
+records stay local and are excluded from Git. The retrieved license label is
+"Data files © Original Authors".
 
-## Outputs and explanation
+There are 7,043 customers and 21 columns. Churn is the target (No = 0, Yes = 1).
+Customer IDs are excluded from the 19 predictors. Eleven blank TotalCharges
+values remain missing. Valid categories such as "No internet service" are kept.
+The 80/20 stratified split uses seed 42: 5,634 training rows and 1,409 reserved
+test rows. Feature analysis uses training data only. No imputation, encoding
+or scaling is fitted in this phase.
 
-The EDA uses 5,634 training records. It saves six aggregate CSV tables and four
-PNG figures covering churn balance, numeric distributions, category churn
-rates with group sizes, and correlations. The findings explain the observed
-associations and the reasons for the preparation choices. There are no test
-feature summaries or model performance claims.
+## Files
 
-The notebook calls the same small Python files used by the command-line
-workflow and displays their aggregate outputs. Keep these files together.
-run_notebook.py selects the current Python interpreter explicitly and executes
-the notebook with a fresh kernel. In an editor, choose the environment where
-the requirements were installed.
+- notebooks/01_data_exploration.ipynb: inspection, cleaning decisions and EDA.
+- src/data.py: loading, type cleaning and the reproducible split.
+- scripts/run_exploration.py: fresh-kernel execution.
+- outputs/: figures and aggregate tables, regenerated by the notebook.
+- tests/test_data.py: data quality and original split checks.
 
-The checked local environment is recorded in results/environment.json. On the
-author's Windows computer, the bundled Python 3.12 runtime and a local
-.venv312 environment were used after application control rejected a newly
-installed Python 3.14 pandas build. Security settings were not changed.
+The notebook records findings and limitations. These sample data cannot establish
+why a customer leaves or guarantee performance on another company's customers.
+Gender and the senior-citizen indicator need a fairness review before deployment.
 
-## Next milestone
+## Assistance
 
-Build preprocessing pipelines and the three required baseline classifiers.
-Imputation, encoding and scaling must be fitted within training folds.
-Clarify the brief's phrase "both model experimental settings" before finalizing
-the experiment comparison. Keep the final test reserved until selection is fixed.
-
-## Dataset and publication
-
-Source: [Telco Customer Churn, blastchar on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn).
-The downloaded metadata identifies version 1, last updated 23 February 2018,
-and credits IBM sample data. The download is dated 10 November 2026.
-
-Kaggle labels the data license "Data files © Original Authors". No broader
-redistribution permission is assumed. Original and prepared customer-level data
-remain local and are excluded from Git. Run the downloader to obtain the same
-bytes from Kaggle.
-
-The supplied university specification and personal study notes stay outside this
-repository. This repository contains coursework code and aggregate analysis.
+OpenAI Codex assisted with planning, code, checks and explanation drafts. The
+student should review the work, be able to explain each step, and disclose
+assistance according to university requirements.

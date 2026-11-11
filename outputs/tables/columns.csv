@@ -1,0 +1,22 @@
+column,type,missing,role
+customerID,str,0,"identifier, excluded"
+gender,str,0,categorical predictor
+SeniorCitizen,str,0,categorical predictor
+Partner,str,0,categorical predictor
+Dependents,str,0,categorical predictor
+tenure,int64,0,numeric predictor
+PhoneService,str,0,categorical predictor
+MultipleLines,str,0,categorical predictor
+InternetService,str,0,categorical predictor
+OnlineSecurity,str,0,categorical predictor
+OnlineBackup,str,0,categorical predictor
+DeviceProtection,str,0,categorical predictor
+TechSupport,str,0,categorical predictor
+StreamingTV,str,0,categorical predictor
+StreamingMovies,str,0,categorical predictor
+Contract,str,0,categorical predictor
+PaperlessBilling,str,0,categorical predictor
+PaymentMethod,str,0,categorical predictor
+MonthlyCharges,float64,0,numeric predictor
+TotalCharges,float64,11,numeric predictor
+Churn,int64,0,"target, excluded from predictors"

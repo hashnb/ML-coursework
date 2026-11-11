@@ -1,72 +1,65 @@
-"""Check data failures that could silently damage later evaluation."""
+"""Check cleaning decisions and preserve the original holdout membership."""
 
+import hashlib
 import unittest
 
-from audit_data import audit, read_original, validate_schema
-from download_data import verify_bytes
-from prepare_data import FEATURES, clean_data, make_split
+import pandas as pd
+
+from src.data import FEATURES, ROOT, clean_data, load_data, make_split
 
 
-class DataChecks(unittest.TestCase):
+class DataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.original = read_original()
+        cls.raw = load_data()
+        cls.data = clean_data(cls.raw)
+        cls.train, cls.test = make_split(cls.data)
 
-    def test_original_quality_counts(self):
-        result = audit(self.original)
-        self.assertEqual((result["rows"], result["columns"]), (7043, 21))
-        self.assertEqual(result["blank_counts"]["TotalCharges"], 11)
-        self.assertEqual(result["churn_counts"], {"No": 5174, "Yes": 1869})
-
-    def test_changed_original_is_rejected(self):
-        with self.assertRaisesRegex(ValueError, "Dataset version differs"):
-            verify_bytes(b"changed data")
-
-    def test_duplicate_customer_is_rejected(self):
-        frame = self.original.copy()
-        frame.loc[1, "customerID"] = frame.loc[0, "customerID"]
-        with self.assertRaisesRegex(ValueError, "duplicate customer"):
-            validate_schema(frame)
-
-    def test_unknown_target_is_rejected(self):
-        frame = self.original.copy()
-        frame.loc[0, "Churn"] = "Maybe"
-        with self.assertRaisesRegex(ValueError, "Unexpected values in Churn"):
-            validate_schema(frame)
-
-    def test_unexpected_numeric_text_is_rejected(self):
-        frame = self.original.copy()
-        frame.loc[0, "TotalCharges"] = "not known"
-        with self.assertRaisesRegex(ValueError, "Unexpected non-numeric"):
-            validate_schema(frame)
-
-    def test_cleaning_preserves_missing_totals_and_rows(self):
-        cleaned = clean_data(self.original)
-        self.assertEqual(len(cleaned), len(self.original))
-        self.assertEqual(int(cleaned["TotalCharges"].isna().sum()), 11)
-        self.assertEqual(set(cleaned["Churn"]), {0, 1})
+    def test_source_and_cleaning(self):
+        self.assertEqual(self.raw.shape, (7043, 21))
+        self.assertEqual(self.data["TotalCharges"].isna().sum(), 11)
+        self.assertEqual(self.data["Churn"].value_counts().to_dict(), {0: 5174, 1: 1869})
+        self.assertEqual(self.data["OnlineSecurity"].eq("No internet service").sum(), 1526)
+        self.assertEqual(len(FEATURES), 19)
         self.assertNotIn("customerID", FEATURES)
         self.assertNotIn("Churn", FEATURES)
-        self.assertEqual(len(FEATURES), 19)
-        self.assertEqual(int(self.original["TotalCharges"].eq(" ").sum()), 11)
+        pd.testing.assert_frame_equal(load_data(), self.raw)
+        self.assertTrue(self.raw["TotalCharges"].str.strip().eq("").any())
 
-    def test_split_is_disjoint_complete_and_repeatable(self):
-        cleaned = clean_data(self.original)
-        train, test = make_split(cleaned)
-        train_again, test_again = make_split(cleaned)
-        self.assertEqual((len(train), len(test)), (5634, 1409))
-        self.assertFalse(set(train["customerID"]) & set(test["customerID"]))
-        self.assertEqual(set(train.index) | set(test.index), set(cleaned.index))
-        self.assertEqual(train.index.tolist(), train_again.index.tolist())
-        self.assertEqual(test.index.tolist(), test_again.index.tolist())
-        for partition in [train, test]:
-            self.assertLess(abs(partition["Churn"].mean() - cleaned["Churn"].mean()), 0.001)
+    def test_reserved_split(self):
+        self.assertEqual((len(self.train), len(self.test)), (5634, 1409))
+        self.assertFalse(set(self.train.customerID) & set(self.test.customerID))
+        self.assertEqual(set(self.train.index) | set(self.test.index), set(self.data.index))
+        self.assertEqual(self.train.Churn.value_counts().to_dict(), {0: 4139, 1: 1495})
+        self.assertEqual(self.test.Churn.value_counts().to_dict(), {0: 1035, 1: 374})
+        self.assertEqual(self.train.TotalCharges.isna().sum(), 8)
+        expected = {
+            "train": "b40bab5915da4f073e517c1552b56a724076ba055b4c01c466ef3bd74d576629",
+            "test": "1778b191a462b1df1b25710b8410b7baec8fc8de1fd9814bd7d39c55eca69dd0",
+        }
+        for name, partition in [("train", self.train), ("test", self.test)]:
+            manifest = partition[["customerID"]].copy()
+            manifest.insert(0, "original_row_index", partition.index)
+            contents = manifest.to_csv(index=False, lineterminator="\n").encode()
+            self.assertEqual(hashlib.sha256(contents).hexdigest(), expected[name])
+            saved = ROOT / "data/splits" / f"{name}_rows.csv"
+            if saved.exists():
+                self.assertEqual(saved.read_bytes(), contents)
 
-    def test_missing_monthly_charge_is_rejected(self):
-        frame = self.original.copy()
-        frame.loc[0, "MonthlyCharges"] = ""
-        with self.assertRaisesRegex(ValueError, "Unexpected non-numeric"):
-            clean_data(frame)
+    def test_invalid_values_are_rejected(self):
+        for column, value in [("Churn", "Unknown"), ("tenure", "bad"),
+                              ("MonthlyCharges", ""), ("TotalCharges", "bad")]:
+            with self.subTest(column=column):
+                invalid = self.raw.copy()
+                invalid.loc[0, column] = value
+                with self.assertRaises(ValueError):
+                    clean_data(invalid)
+
+    def test_duplicate_customers_are_rejected(self):
+        invalid = self.raw.copy()
+        invalid.loc[1, "customerID"] = invalid.loc[0, "customerID"]
+        with self.assertRaisesRegex(ValueError, "Duplicate customer"):
+            clean_data(invalid)
 
 
 if __name__ == "__main__":
