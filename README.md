@@ -1,8 +1,8 @@
 # Telco customer churn
 
 CM2604 Coursework Part 1. The project explores the training data and prepares
-it for modelling. Preprocessing and the three baseline classifiers are complete.
-Hyperparameter tuning, final-test evaluation and the report are later phases.
+it for modelling. All three classifiers have baseline and tuned configurations.
+Final-test evaluation and the report are later phases.
 
 ## Run
 
@@ -75,6 +75,23 @@ produce 46 numeric/encoded features on the current training data.
 
 ## Files
 
+The comparison notebook also runs the small tuning grids: 6 KNN, 4 logistic
+regression and 8 random forest candidates, each on five training folds.
+Selection uses mean churn F1. Tuned F1 is 0.6003 for KNN, 0.5965 for logistic
+regression and 0.5814 for random forest. The selected KNN uses 25 neighbours
+and uniform votes. Its lead is small compared with fold variation; these
+selection-CV scores do not establish final-test performance.
+
+All selected settings and the chosen model are fixed in
+outputs/frozen_configuration.json before evaluating the test set. The standard
+classifier.predict decision rule is unchanged. Exact score ties retain the
+first grid candidate, then the first model in KNN/logistic/forest order.
+Candidate results and fold F1 values are in outputs/tables/tuning_candidates.csv;
+the selected configurations and baseline changes are in tuned_comparison.csv.
+The baseline-settings hash in the frozen file uses UTF-8 text with LF newlines.
+The user confirmed baseline versus tuned as the working interpretation of both
+experimental settings; the lecturer's intended meaning remains unclarified.
+
 The [model-comparison notebook](notebooks/02_model_comparison.ipynb) compares
 KNN, logistic regression and random forest on the same five training folds.
 Each complete pipeline is fitted within its fold. Full settings are saved in
@@ -91,7 +108,7 @@ The notebook explains false alarms, missed churners and limitations.
 - notebooks/02_model_comparison.ipynb: baseline comparison and explanation.
 - src/data.py: loading, type cleaning and the reproducible split.
 - src/preprocessing.py: numeric/categorical preparation and shared CV folds.
-- src/models.py and src/train.py: baseline settings and shared-fold scoring.
+- src/models.py and src/train.py: baselines, small tuning grids and shared-fold scoring.
 - scripts/run_exploration.py: fresh-kernel execution.
 - scripts/run_preprocessing.py: training-fold majority-class reference.
 - scripts/run_notebook.py: execute the comparison notebook, or a supplied notebook path.
@@ -99,6 +116,7 @@ The notebook explains false alarms, missed churners and limitations.
 - tests/test_data.py: data quality and original split checks.
 - tests/test_preprocessing.py: missing values, new categories, scaling and fold isolation.
 - tests/test_models.py: pipeline roles and independent prediction/metric checks.
+- tests/test_tuning.py: baseline grid coverage and independent selected-candidate fold scores.
 
 The notebook records findings and limitations. These sample data cannot establish
 why a customer leaves or guarantee performance on another company's customers.

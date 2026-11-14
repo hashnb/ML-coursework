@@ -1,4 +1,4 @@
-"""Explicit baseline settings; no hyperparameter search is performed here."""
+"""Baseline pipelines and small, explicit hyperparameter grids."""
 
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -27,4 +27,16 @@ def make_models():
         name: Pipeline([("preprocessing", make_preprocessor(name != "Random forest")),
                         ("classifier", classifier)])
         for name, classifier in classifiers.items()
+    }
+
+
+def make_search_grids():
+    """Include each original baseline so tuning can retain its settings."""
+    return {
+        "KNN": {"classifier__n_neighbors": [5, 15, 25],
+                "classifier__weights": ["uniform", "distance"]},
+        "Logistic regression": {"classifier__C": [0.01, 0.1, 1.0, 10.0]},
+        "Random forest": {"classifier__n_estimators": [100, 200],
+                          "classifier__max_depth": [None, 8],
+                          "classifier__min_samples_leaf": [1, 5]},
     }

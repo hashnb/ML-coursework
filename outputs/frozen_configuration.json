@@ -1,0 +1,117 @@
+{
+  "selected_model": "KNN",
+  "selection_metric": "mean training-CV churn F1",
+  "tie_rule": "first grid candidate; first model in KNN, logistic regression, random forest order",
+  "prediction_method": "classifier.predict (standard decision rule, unchanged)",
+  "cv": {
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "split": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "stratify": "Churn",
+    "manifest_sha256": {
+      "train": "b40bab5915da4f073e517c1552b56a724076ba055b4c01c466ef3bd74d576629",
+      "test": "1778b191a462b1df1b25710b8410b7baec8fc8de1fd9814bd7d39c55eca69dd0"
+    }
+  },
+  "source_sha256": "88be4b93fbe0cc83421af1c503794c97c342eca914c1576db7c276e61d61358a",
+  "sklearn_version": "1.9.1",
+  "baseline_settings_sha256": "498a2d291601320ee17d28bd6fbdfe04912e7df32d852a08cfbed2c68a18da47",
+  "features": [
+    "tenure",
+    "MonthlyCharges",
+    "TotalCharges",
+    "gender",
+    "SeniorCitizen",
+    "Partner",
+    "Dependents",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod"
+  ],
+  "positive_class": 1,
+  "final_test_evaluated": false,
+  "experimental_settings": "baseline versus tuned; user-approved interpretation; lecturer clarification pending",
+  "configurations": {
+    "KNN": {
+      "parameters": {
+        "classifier__n_neighbors": 25,
+        "classifier__weights": "uniform"
+      },
+      "classifier": {
+        "algorithm": "brute",
+        "leaf_size": 30,
+        "metric": "minkowski",
+        "metric_params": null,
+        "n_jobs": 1,
+        "n_neighbors": 25,
+        "p": 2,
+        "weights": "uniform"
+      },
+      "scale_numeric": true
+    },
+    "Logistic regression": {
+      "parameters": {
+        "classifier__C": 10.0
+      },
+      "classifier": {
+        "C": 10.0,
+        "class_weight": null,
+        "dual": false,
+        "fit_intercept": true,
+        "intercept_scaling": 1,
+        "l1_ratio": 0.0,
+        "max_iter": 1000,
+        "n_jobs": null,
+        "penalty": "deprecated",
+        "random_state": 42,
+        "solver": "lbfgs",
+        "tol": 0.0001,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "scale_numeric": true
+    },
+    "Random forest": {
+      "parameters": {
+        "classifier__max_depth": 8,
+        "classifier__min_samples_leaf": 5,
+        "classifier__n_estimators": 100
+      },
+      "classifier": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 8,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 5,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 100,
+        "n_jobs": 1,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "scale_numeric": false
+    }
+  }
+}
